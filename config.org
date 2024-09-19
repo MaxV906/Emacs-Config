@@ -1,0 +1,295 @@
+#+TITLE:MaxV's Emacs Config
+#+AUTHOR:MaxV
+#+DESCRIPTION: Emacs configuration file
+
+* General config
+** Disable visual bloat
+#+begin_src emacs-lisp
+  (setq inhibit-startup-message t)
+  (scroll-bar-mode -1)
+  (tool-bar-mode -1)
+  (tooltip-mode -1)
+  (set-fringe-mode 10)
+  (menu-bar-mode -1)
+#+end_src
+
+** Disable audio and visual bell 
+#+begin_src emacs-lisp
+  (setq visible-bell nil)
+  (setq ring-bell-function 'ignore)
+#+end_src
+
+** Disable kill buffer warning
+#+begin_src emacs-lisp
+  (setq kill-buffer-query-functions
+        (delq 'process-kill-buffer-query-function kill-buffer-query-functions))
+#+end_src
+
+** Setup line number mode
+#+begin_src emacs-lisp
+  (column-number-mode)
+  (global-display-line-numbers-mode t)
+
+  (dolist (mode '(org-mode-hook
+                  term-mode-hook
+                  vterm-mode-hook
+                  treemacs-mode-hook
+                  eshell-mode-hook))
+    (add-hook mode (lambda () (display-line-numbers-mode 0))))
+#+end_src
+
+** Space to tabs
+#+begin_src emacs-lisp
+  (setq-default indent-tabs-mode nil)
+  (setq-default tab-width 4)
+  (setq indent-line-function 'insert-tab)
+#+end_src
+
+** Fonts
+#+begin_src emacs-lisp
+  (add-to-list 'default-frame-alist '(font . "FiraCode Nerd Font-11")) 
+#+end_src
+
+** Global keybinds
+#+begin_src emacs-lisp
+  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+  (global-set-key (kbd "C-c c") (lambda () (interactive) (find-file "~/.emacs.d/config.org")))
+#+end_src
+
+** Initialize package Sources
+#+begin_src emacs-lisp
+  (require 'package)
+
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+  (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+  (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
+  (add-to-list 'package-archives '("elpa" . "https://elpa.gnu.org/packages/") t)
+  (add-to-list 'package-archives '( "jcs-elpa" . "https://jcs-emacs.github.io/jcs-elpa/packages/") t)
+
+  (package-initialize)
+  (unless package-archive-contents
+    (package-refresh-contents))
+#+end_src
+
+** Initialize use-package
+#+begin_src emacs-lisp
+  (unless (package-installed-p 'use-package)
+    (package-install 'use-package))
+
+  (require 'use-package)
+  (setq use-package-always-ensure t)
+#+end_src
+
+* Setup packages
+** Command log mode
+#+begin_src emacs-lisp
+  (use-package command-log-mode)
+#+end_src
+
+** Ivy
+#+begin_src emacs-lisp
+  (use-package ivy
+    :diminish
+    :bind (("C-s" . swiper)
+           :map ivy-minibuffer-map
+           ("TAB" . ivy-alt-done)
+           ("C-l" . ivy-alt-done)
+           ("C-j" . ivy-alt-next-line)
+           ("C-k" . ivy-alt-previous-line)
+           :map ivy-switch-buffer-map
+           ("C-k" . ivy-previous-line)
+           ("C-l" . ivy-done)
+           ("C-d" . ivy-swtich-buffer-kill)
+           :map ivy-reverse-i-search-map
+           ("C-k" . ivy-previous-line)
+           ("C-d" . ivy-reverse-i-search-kill))
+    :config
+    (ivy-mode 1))
+#+end_src
+
+** Doom mode
+#+begin_src emacs-lisp
+  (use-package doom-modeline
+    :ensure t
+    :init (doom-modeline-mode 1))
+
+  (use-package doom-themes
+    :init (load-theme 'doom-Iosvkem 1))
+#+end_src
+
+** Beacon
+#+begin_src emacs-lisp
+  (use-package beacon)
+  (beacon-mode 1)
+#+end_src
+
+** Evil setup
+#+begin_src emacs-lisp
+  (use-package evil
+    :init
+    (setq evil-want-intergration t)
+    (setq evil-want-keybinding nil)
+    (setq evil-want-C-u-scroll t)
+    (setq evil-want-C-i-jump nil)
+    :config
+    (evil-mode 1)
+    (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+
+    (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+    (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+
+    (evil-set-initial-state 'messages-buffer-mode 'normal)
+    (evil-set-initial-state 'dashboard-mode 'normal))
+
+  (use-package evil-collection
+    :after evil
+    :config
+    (setq evil-auto-indent nil)
+    (evil-collection-init))
+
+  (use-package evil-numbers
+    :after evil
+    :bind(("C-c =" . evil-numbers/inc-at-pt)
+          ("C-c -" . evil-numbers/dec-at-pt)))
+#+end_src
+
+** Rainbow delimiters
+#+begin_src emacs-lisp
+  (use-package rainbow-delimiters
+    :hook (prog-mode . rainbow-delimiters-mode))
+#+end_src
+
+** Which Key
+#+begin_src emacs-lisp
+  (use-package which-key
+    :init (which-key-mode)
+    :diminish which-key-mode
+    :config
+    (setq which-key-idle-delay 0.3))
+#+end_src
+
+** Counsel
+#+begin_src emacs-lisp
+  (use-package counsel
+    :bind (("M-x" . counsel-M-x)
+           ("C-x b" . counsel-ibuffer)
+           ("C-x C-f" . counsel-find-file)
+           :map minibuffer-local-map
+           ("C-r" . 'counsel-minibuffer-history))
+    :config
+    (setq ivy-initial-inputs-alist nil))
+#+end_src
+
+** Org
+#+begin_src emacs-lisp
+  (use-package org
+    :bind(("<tab>" . tab-to-tab-stop))
+    :config
+    (setq electric-indent-mode nil)
+    (setq org-ellipsis " ▼"))
+
+  (use-package org-bullets
+    :after org
+    :hook (org-mode . org-bullets-mode)
+    :custom
+    (org-bullets-bullet-list '("◉" "○" "◉" "○")))
+
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '(
+     (python . t)
+     (C . t)
+     (shell . t)))
+
+  (setq org-confirm-babel-evaluate nil)
+#+end_src
+
+** LSP
+#+begin_src emacs-lisp
+  (defun efs/lsp-mode-setup ()
+    (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+    (lsp-headerline-breadcrumb-mode)
+    (treemacs)
+    (lsp-treemacs-symbols))
+
+  (use-package treemacs
+    :ensure t
+    :bind(("C-c t t" . treemacs)
+          ("C-c t s" . treemacs-select-window)
+          ("C-c t d" . treemacs-select-directory)
+          ("C-c t k" . treemacs-kill-buffer))
+    :config
+    (setq treemacs-is-never-other-window t))
+
+  (use-package lsp-mode
+    :commands (lsp lsp-deferred)
+    :init
+    (setq lsp-keymap-prefix "C-c l")
+    :hook (
+           (lsp-mode . efs/lsp-mode-setup)
+           (c-mode . lsp))
+    :config
+    (lsp-enable-which-key-integration t))
+
+  (use-package lsp-ui
+    :hook (lsp-mode . lsp-ui-mode)
+    :custom
+    (lsp-ui-doc-position 'bottom))
+
+  (use-package lsp-treemacs
+    :after lsp)
+
+  (use-package lsp-ivy)
+#+end_src
+
+** Projectile
+#+begin_src emacs-lisp
+  (use-package projectile
+    :ensure t
+    :bind (("C-c p" . projectile-command-map))
+    :config
+    (setq projectile-completion-system 'ido)
+    (setq ido-enable-flex-matching t)
+    (projectile-mode 1))
+#+end_src
+
+** Magit
+#+begin_src emacs-lisp
+  (use-package magit
+    :ensure t)
+#+end_src
+
+** VTerm
+#+begin_src emacs-lisp
+  (use-package vterm
+    :commands vterm
+    :bind (("C-c v" . multi-vterm))
+    :config
+    (setq vterm-shell "zsh")
+    (setq term-prompt-gexp "^[^#$%>\n]*[#$%>] *")
+    (setq vterm-max-scrollback 10000))
+#+end_src
+
+** Dired
+#+begin_src emacs-lisp
+  (use-package dired
+    :ensure nil
+    :commands (dired dired-jump)
+    :bind (("C-x C-j" . dired-jump))
+    :custom ((dired-listing-switches "-agho --group-directories-first"))
+    :config
+    (evil-collection-define-key 'normal 'dired-mode-map
+      "h" 'dired-up-directory
+      "l" 'dired-find-file))
+#+end_src
+
+** Lang Tool
+#+begin_src emacs-lisp
+    (use-package langtool
+        :ensure t
+        :bind (("C-c l d" . langtool-check-done)
+            ("C-c l c" . langtool-check-buffer))
+        :config
+        (setq langtool-language-tool-jar "~/.local/share/LanguageTool-6.4/languagetool-commandline.jar"))
+#+end_src
