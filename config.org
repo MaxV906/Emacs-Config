@@ -263,11 +263,14 @@
 #+begin_src emacs-lisp
   (use-package vterm
     :commands vterm
-    :bind (("C-c v" . multi-vterm))
     :config
     (setq vterm-shell "zsh")
     (setq term-prompt-gexp "^[^#$%>\n]*[#$%>] *")
     (setq vterm-max-scrollback 10000))
+
+  (use-package multi-vterm
+    :ensure t
+    :bind (("C-c v" . multi-vterm)))
 #+end_src
 
 ** Dired
