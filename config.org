@@ -41,7 +41,7 @@
 ** Space to tabs
 #+begin_src emacs-lisp
   (setq-default indent-tabs-mode nil)
-  (setq-default tab-width 4)
+  (setq-default tab-width 2)
   (setq indent-line-function 'insert-tab)
 #+end_src
 
@@ -114,7 +114,7 @@
     :init (doom-modeline-mode 1))
 
   (use-package doom-themes
-    :init (load-theme 'doom-Iosvkem 1))
+    :init (load-theme 'doom-ir-black 1))
 #+end_src
 
 ** Beacon
@@ -184,7 +184,6 @@
 ** Org
 #+begin_src emacs-lisp
   (use-package org
-    :bind(("<tab>" . tab-to-tab-stop))
     :config
     (setq electric-indent-mode nil)
     (setq org-ellipsis " ▼"))
@@ -207,40 +206,40 @@
 
 ** LSP
 #+begin_src emacs-lisp
-  (defun efs/lsp-mode-setup ()
-    (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-    (lsp-headerline-breadcrumb-mode)
-    (treemacs)
-    (lsp-treemacs-symbols))
+    (defun efs/lsp-mode-setup ()
+      (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+      (setq lsp-treemacs-sync-mode 1)
+      (lsp-headerline-breadcrumb-mode)
+      (treemacs)
+      (lsp-treemacs-symbols))
 
-  (use-package treemacs
-    :ensure t
-    :bind(("C-c t t" . treemacs)
-          ("C-c t s" . treemacs-select-window)
-          ("C-c t d" . treemacs-select-directory)
-          ("C-c t k" . treemacs-kill-buffer))
-    :config
-    (setq treemacs-is-never-other-window t))
+    (use-package treemacs
+      :ensure t
+      :bind(("C-c t t" . treemacs)
+            ("C-c t s" . treemacs-select-window)
+            ("C-c t d" . treemacs-select-directory)
+            ("C-c t k" . treemacs-kill-buffer))
+      :config
+      (setq treemacs-is-never-other-window t))
 
-  (use-package lsp-mode
-    :commands (lsp lsp-deferred)
-    :init
-    (setq lsp-keymap-prefix "C-c l")
-    :hook (
-           (lsp-mode . efs/lsp-mode-setup)
-           (c-mode . lsp))
-    :config
-    (lsp-enable-which-key-integration t))
+    (use-package lsp-mode
+      :commands (lsp lsp-deferred)
+      :init
+      (setq lsp-keymap-prefix "C-c l")
+      :hook ((lsp-mode . efs/lsp-mode-setup)
+             (c-mode . lsp-deferred))
+      :config
+      (lsp-enable-which-key-integration t))
 
-  (use-package lsp-ui
-    :hook (lsp-mode . lsp-ui-mode)
-    :custom
-    (lsp-ui-doc-position 'bottom))
+    (use-package lsp-ui
+      :hook (lsp-mode . lsp-ui-mode)
+      :custom
+      (lsp-ui-doc-position 'bottom))
 
-  (use-package lsp-treemacs
-    :after lsp)
+    (use-package lsp-treemacs
+      :after lsp)
 
-  (use-package lsp-ivy)
+    (use-package lsp-ivy)
 #+end_src
 
 ** Projectile
@@ -286,10 +285,37 @@
 
 ** Lang Tool
 #+begin_src emacs-lisp
-    (use-package langtool
-        :ensure t
-        :bind (("C-c l d" . langtool-check-done)
-            ("C-c l c" . langtool-check-buffer))
-        :config
-        (setq langtool-language-tool-jar "~/.local/share/LanguageTool-6.4/languagetool-commandline.jar"))
+  (use-package langtool
+    :ensure t
+    :bind (("C-c l d" . langtool-check-done)
+        ("C-c l c" . langtool-check-buffer))
+    :config
+    (setq langtool-language-tool-jar "~/.local/share/LanguageTool-6.4/languagetool-commandline.jar"))
+#+end_src
+
+** XWidget Webkit
+#+begin_src emacs-lisp
+  (if (featurep 'xwidget)
+
+    (defun disable-evil-in-xwidget ()
+      (when (derived-mode-p 'xwidget-webkit-mode)
+        (evil-emacs-state)))
+
+    (add-hook 'xwidget-webkit-mode-hook 'disable-evil-in-xwidget)
+
+    (setq search-engine "https://duckduckgo.com")
+
+    (defun browser-open ()
+      (interactive)
+      (xwidget-webkit-browse-url search-engine))
+
+    (defun browser-search (query)
+      (interactive "sSearch: ")
+      (xwidget-webkit-browse-url (concat search-engine "?q=" (url-hexify-string query))))
+
+
+    (global-set-key (kbd "C-c b") 'browser-open)
+    (global-set-key (kbd "C-c s") 'browser-search)
+
+    (define-key xwidget-webkit-mode-map (kbd "C-c C-e") 'xwidget-webkit-edit-mode))
 #+end_src
