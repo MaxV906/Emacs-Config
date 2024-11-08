@@ -285,30 +285,3 @@
       "h" 'dired-up-directory
       "l" 'dired-find-file))
 #+end_src
-
-** XWidget Webkit
-#+begin_src emacs-lisp
-  (if (featurep 'xwidget)
-
-    (defun disable-evil-in-xwidget ()
-      (when (derived-mode-p 'xwidget-webkit-mode)
-        (evil-emacs-state)))
-
-    (add-hook 'xwidget-webkit-mode-hook 'disable-evil-in-xwidget)
-
-    (setq search-engine "https://duckduckgo.com")
-
-    (defun browser-open ()
-      (interactive)
-      (xwidget-webkit-browse-url search-engine))
-
-    (defun browser-search (query)
-      (interactive "sSearch: ")
-      (xwidget-webkit-browse-url (concat search-engine "?q=" (url-hexify-string query))))
-
-
-    (global-set-key (kbd "C-c b") 'browser-open)
-    (global-set-key (kbd "C-c s") 'browser-search)
-
-    (define-key xwidget-webkit-mode-map (kbd "C-c C-e") 'xwidget-webkit-edit-mode))
-#+end_src
