@@ -204,14 +204,19 @@
   (setq org-confirm-babel-evaluate nil)
 #+end_src
 
+** Rust mode
+#+begin_src emacs-lisp
+  (use-package rust-mode
+    :ensure t
+    :init)
+#+end_src
+
 ** LSP
 #+begin_src emacs-lisp
     (defun efs/lsp-mode-setup ()
       (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
       (setq lsp-treemacs-sync-mode 1)
-      (lsp-headerline-breadcrumb-mode)
-      (treemacs)
-      (lsp-treemacs-symbols))
+      (lsp-headerline-breadcrumb-mode))
 
     (use-package treemacs
       :ensure t
@@ -227,6 +232,7 @@
       :init
       (setq lsp-keymap-prefix "C-c l")
       :hook ((lsp-mode . efs/lsp-mode-setup)
+             (rust-mode . lsp-deferred)
              (c-mode . lsp-deferred))
       :config
       (lsp-enable-which-key-integration t))
