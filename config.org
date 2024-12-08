@@ -196,19 +196,22 @@
 
   (org-babel-do-load-languages
    'org-babel-load-languages
-   '(
-     (python . t)
+   '((python . t)
      (C . t)
+     (rust . t)
      (shell . t)))
 
   (setq org-confirm-babel-evaluate nil)
 #+end_src
 
-** Rust mode
+** Rust
 #+begin_src emacs-lisp
   (use-package rust-mode
     :ensure t
     :init)
+
+  (use-package ob-rust
+    :ensure t)
 #+end_src
 
 ** LSP
