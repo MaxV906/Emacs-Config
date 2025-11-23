@@ -47,7 +47,7 @@
 
 ** Fonts
 #+begin_src emacs-lisp
-  (add-to-list 'default-frame-alist '(font . "FiraCode Nerd Font-11")) 
+  (add-to-list 'default-frame-alist '(font . "DepartureMono Nerd Font-11")) 
 #+end_src
 
 ** Global keybinds
@@ -210,46 +210,68 @@
     :ensure t
     :init)
 
+  (use-package cargo-mode
+    :ensure t
+    :hook
+    (rustic-mode . cargo-minor-mode))
+
   (use-package ob-rust
     :ensure t)
 #+end_src
 
+#+RESULTS:
+
 ** LSP
 #+begin_src emacs-lisp
-    (defun efs/lsp-mode-setup ()
-      (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-      (setq lsp-treemacs-sync-mode 1)
-      (lsp-headerline-breadcrumb-mode))
+  (defun efs/lsp-mode-setup ()
+    (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+    (setq lsp-treemacs-sync-mode 1)
+    (lsp-headerline-breadcrumb-mode))
 
-    (use-package treemacs
-      :ensure t
-      :bind(("C-c t t" . treemacs)
-            ("C-c t s" . treemacs-select-window)
-            ("C-c t d" . treemacs-select-directory)
-            ("C-c t k" . treemacs-kill-buffer))
-      :config
-      (setq treemacs-is-never-other-window t))
+  (use-package treemacs
+    :ensure t
+    :bind(("C-c t t" . treemacs)
+          ("C-c t s" . treemacs-select-window)
+          ("C-c t d" . treemacs-select-directory)
+          ("C-c t k" . treemacs-kill-buffer))
+    :config
+    (setq treemacs-is-never-other-window t))
 
-    (use-package lsp-mode
-      :commands (lsp lsp-deferred)
-      :init
-      (setq lsp-keymap-prefix "C-c l")
-      :hook ((lsp-mode . efs/lsp-mode-setup)
-             (rust-mode . lsp-deferred)
-             (c-mode . lsp-deferred))
-      :config
-      (lsp-enable-which-key-integration t))
+  (use-package lsp-mode
+    :commands (lsp lsp-deferred)
+    :init
+    (setq lsp-keymap-prefix "C-c l")
+    :hook ((lsp-mode . efs/lsp-mode-setup)
+           (rust-mode . lsp-deferred)
+           (c-mode . lsp-deferred))
+    :config
+    (lsp-enable-which-key-integration t))
 
-    (use-package lsp-ui
-      :hook (lsp-mode . lsp-ui-mode)
-      :custom
-      (lsp-ui-doc-position 'bottom))
+  (use-package lsp-ui
+    :hook (lsp-mode . lsp-ui-mode)
+    :custom
+    (lsp-ui-doc-position 'bottom))
 
-    (use-package lsp-treemacs
-      :after lsp)
+  (use-package lsp-treemacs
+    :after lsp)
 
-    (use-package lsp-ivy)
+  (use-package lsp-ivy)
+
+  (use-package company
+    :ensure t
+    :after lsp-mode
+    :hook (lsp-mode . company-mode)
+    :bind (:map company-active-map
+                ("<tab>" . company-complete-selection))
+          (:map lsp-mode-map
+                ("<tab>" . company-indent-or-complete-common))
+    :custom
+    (company-minimum-prefix-length 1)
+    (company-idle-delay 0.0))
 #+end_src
+
+#+RESULTS:
+: company-indent-or-complete-common
 
 ** Projectile
 #+begin_src emacs-lisp
